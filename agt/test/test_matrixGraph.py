@@ -1,0 +1,117 @@
+from unittest import TestCase
+from agt.graph import MatrixGraph
+from agt.util.arrayops import generate_lower_triangle
+from agt.util.math import choose
+
+
+class TestMatrixGraph(TestCase):
+
+    def test_constructor1(self):
+        g = MatrixGraph(4)
+        self.assertEqual(4, g.order())
+        self.assertEqual(0, g.size())
+
+    def test_constructor2(self):
+        g = MatrixGraph(order=4, edges=[(0, 1), (1, 2)])
+        self.assertEqual(4, g.order())
+        self.assertEqual(2, g.size())
+        self.assertIn({0, 1}, g)
+        self.assertIn({1, 2}, g)
+
+    def test_constructor3(self):
+        g = MatrixGraph(edges=[(0, 1), (1, 2), (2, 3)])
+        self.assertEqual(4, g.order())
+        self.assertEqual(3, g.size())
+        self.assertIn({0, 1}, g)
+        self.assertIn({1, 2}, g)
+        self.assertIn({3, 2}, g)
+
+    def test_constructor3(self):
+        g = MatrixGraph(edges=[[1,2,3], [2,3], [], []])
+        self.assertEqual(4, g.order())
+        self.assertEqual(5, g.size())
+
+    def test_add(self):
+        g = MatrixGraph(4)
+        self.assertFalse(g.E(0, 1))
+        g.add(0, 1)
+        self.assertTrue(g.E(0, 1))
+
+    def test_complement(self):
+        g = MatrixGraph(4)
+        g.add(0, 1)
+        g.add(1, 2)
+        g.add(2, 3)
+        g.add(3, 0)
+        c = g.complement()
+
+        self.assertIn((0, 2), c)
+        self.assertIn((1, 3), c)
+        self.assertNotIn((0, 1), c)
+        self.assertNotIn((1, 2), c)
+        self.assertNotIn((2, 3), c)
+        self.assertNotIn((3, 0), c)
+
+    def test_create_random(self):
+        total_edges = 0
+        density = 0.5
+        test_runs = 10
+        for i in range(test_runs):
+            g = MatrixGraph.create_random(32, density=density)
+            for _,_ in g.edges():
+                total_edges += 1
+
+        expected = test_runs * choose(32, 2) * density
+        actual = total_edges
+        self.assertLessEqual(expected * 0.9, actual)
+        self.assertLessEqual(actual, expected * 1.10)
+
+    def test_directed(self):
+        self.assertFalse(MatrixGraph(10).directed())
+
+    def test_E(self):
+        g = MatrixGraph(5)
+        edges = [(0, 1), (1, 2), (2, 3), (3, 4), (4, 0)]
+        for a,b in edges:
+            g.add(a,b)
+        for a,b in generate_lower_triangle(5, diagonal=True):
+            if (a, b) in g:
+                self.assertTrue(g.E(a, b))
+                self.assertTrue(g.E(b, a))
+            else:
+                self.assertFalse(g.E(a, b))
+                self.assertFalse(g.E(b, a))
+
+    def test_edges(self):
+        g = MatrixGraph(5)
+        edges_in = [(0, 1), (1, 2), (2, 3), (3, 4), (4, 0)]
+        for (a, b) in edges_in:
+            g.add(a, b)
+
+        counter = 0
+        for a, b in g.edges():
+            self.assertTrue((a, b) in edges_in or (b, a) in edges_in)
+            counter += 1
+        self.assertEqual(len(edges_in), counter)
+
+    def test_remove(self):
+        g = MatrixGraph(3)
+        g.add(0, 1)
+        g.remove(0, 1)
+        self.assertNotIn((0, 1), g)
+        self.assertNotIn((1, 0), g)
+
+    def test_order(self):
+        g = MatrixGraph(3)
+        self.assertEqual(3, g.order())
+        g = MatrixGraph(10)
+        self.assertEqual(10, g.order())
+
+    def test_iter(self):
+        g = MatrixGraph(3).add(0,1).add(0,2).add(1,2)
+        assert len(list(g)) == 3
+        l = list(g)
+        self.assertIn({0, 1}, l)
+        self.assertIn({0, 2}, l)
+        self.assertIn({1, 2}, l)
+
