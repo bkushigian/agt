@@ -9,6 +9,47 @@ play around with/implement different graph-theoretic algorithms.
 `agt` is simply to use - just import it. No outside packages have been used, so
 as long as you are running Python 3.5 or above you should be fine.
 
+Here is a sample session:
+
+    >>> from agt.graph import MatrixGraph
+    >>> g = MatrixGraph.create_random(order=32, density=0.75)
+    >>> g.size()    # Number of edges
+    376
+    >>> g.order()   # Number of vertices
+    32
+    >>> g.edges()   # Get a numpy adjacency matrix
+	array([[0, 1, 1, ..., 1, 1, 1],
+		   [1, 0, 1, ..., 0, 1, 0],
+		   [1, 1, 0, ..., 1, 1, 1],
+		   ..., 
+		   [1, 0, 1, ..., 0, 1, 0],
+		   [1, 1, 1, ..., 1, 0, 1],
+		   [1, 0, 1, ..., 0, 1, 0]], dtype=uint32)
+    >>> g = MatrixGraph(order=4, edges=[(0,1), (1,2), (2,3), (3,0)])
+    >>> g.order()
+    4
+    >>> g.size()
+    4
+    >>> (0,1) in g
+    True
+    >>> (1,0) in g
+    True
+    >>> g.matrix()
+    [[0, 1, 0, 1],
+     [1, 0, 1, 0],
+     [0, 1, 0, 1],
+     [1, 0, 1, 0]]
+    >>> c = g.complement()
+    >>> c.matrix()
+    [[0, 0, 1, 0],
+     [0, 0, 0, 1],
+     [1, 0, 0, 0],
+     [0, 1, 0, 0]]
+    >>> (0,2) in g
+    False
+    >>> g.add(0,2).add((1,3))
+    <agt.graph.MatrixGraph object at 0x7f1c2a3a6fd8>
+
 ## Development and Contributions
 
 Feel free to fork and tinker. Issue pull requests to contribute
