@@ -37,6 +37,31 @@ class TestMatrixGraph(TestCase):
         g.add(0, 1)
         self.assertTrue(g.E(0, 1))
 
+    def test_adjacent(self):
+        g = MatrixGraph(5).add(0, 1).add(1, 2).add(2, 3).add(3, 4)
+        adj = g.adjacent(0)
+        self.assertEqual(1, len(adj))
+        self.assertIn(1, adj)
+
+        adj = g.adjacent(1)
+        self.assertEqual(2, len(adj))
+        self.assertIn(0, adj)
+        self.assertIn(2, adj)
+
+        adj = g.adjacent(2)
+        self.assertEqual(2, len(adj))
+        self.assertIn(1, adj)
+        self.assertIn(3, adj)
+
+        adj = g.adjacent(3)
+        self.assertEqual(2, len(adj))
+        self.assertIn(2, adj)
+        self.assertIn(4, adj)
+
+        adj = g.adjacent(4)
+        self.assertEqual(1, len(adj))
+        self.assertIn(3, adj)
+
     def test_complement(self):
         g = MatrixGraph(4)
         g.add(0, 1)
@@ -51,6 +76,18 @@ class TestMatrixGraph(TestCase):
         self.assertNotIn((1, 2), c)
         self.assertNotIn((2, 3), c)
         self.assertNotIn((3, 0), c)
+
+    def test_connected1(self):
+        g = MatrixGraph(4, [(0,1), (2,3)])
+        self.assertFalse(g.connected())
+
+    def test_connected2(self):
+        g = MatrixGraph(4, [(0,1), (1,2), (2,3), (3,0)])
+        self.assertTrue(g.connected())
+
+    def test_connected3(self):
+        g = MatrixGraph(5, [(0,1), (0,2), (0,3), (0,4)])
+        self.assertTrue(g.connected())
 
     def test_create_random(self):
         total_edges = 0
@@ -68,6 +105,30 @@ class TestMatrixGraph(TestCase):
 
     def test_directed(self):
         self.assertFalse(MatrixGraph(10).directed())
+
+    def test_distance1(self):
+        g = MatrixGraph(order=5, edges=[(0, 1), (1, 2), (2, 3), (3, 4)])
+        self.assertEquals(0, g.distance(0, 0))
+        self.assertEquals(0, g.distance(1, 1))
+        self.assertEquals(0, g.distance(2, 2))
+        self.assertEquals(0, g.distance(3, 3))
+        self.assertEquals(0, g.distance(4, 4))
+
+        self.assertEquals(1, g.distance(0, 1))
+        self.assertEquals(1, g.distance(1, 2))
+        self.assertEquals(1, g.distance(2, 3))
+        self.assertEquals(1, g.distance(3, 4))
+        self.assertEquals(1, g.distance(1, 0))
+        self.assertEquals(1, g.distance(2, 1))
+        self.assertEquals(1, g.distance(3, 2))
+        self.assertEquals(1, g.distance(4, 3))
+
+        self.assertEquals(2, g.distance(0, 2))
+        self.assertEquals(2, g.distance(1, 3))
+        self.assertEquals(2, g.distance(2, 4))
+        self.assertEquals(2, g.distance(4, 2))
+        self.assertEquals(2, g.distance(3, 1))
+        self.assertEquals(2, g.distance(2, 0))
 
     def test_E(self):
         g = MatrixGraph(5)
