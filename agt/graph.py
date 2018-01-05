@@ -7,6 +7,8 @@ from collections import Iterable
 from agt.util.arrayops import generate_lower_triangle, ones
 
 # These are constants so we declare them once to make life easy
+from agt.util.dot import DotGenerator
+
 one = np.uint32(1)
 zero = np.uint32(0)
 
@@ -36,6 +38,14 @@ class Graph:
         """Represent this graph as a Dot file"""
         raise NotImplementedError()
 
+    def complement(self):
+        """Calculate the complement graph of self"""
+        raise NotImplementedError()
+
+    def density(self):
+        """Calculate the density of this graph"""
+        raise NotImplementedError()
+
     def directed(self):
         """Return true if this is a directed graph, false if it is an undirected graph"""
         raise NotImplementedError()
@@ -46,10 +56,6 @@ class Graph:
 
     def remove(self, a, b=None):
         """Remove an edge"""
-        raise NotImplementedError()
-
-    def complement(self):
-        """Calculate the complement graph of self"""
         raise NotImplementedError()
 
     def order(self):
@@ -154,18 +160,22 @@ class MatrixGraph(Graph):
             raise IndexError("Cannot add edge ({},{}) to graph of order {}".format(a,b,self.order()))
         return self
 
-    def as_dot(self, labels=None):
+    def as_dot(self, labels=None, prefix='n'):
         if not labels:
             labels = []
 
         if len(labels) < self.order():
             # Pad our labels to include a label for each vertex
-            labels += list(map(lambda n : "n{}".format(n), range(len(labels), self.order())))
+            labels += list(map(lambda n: "{}{}".format(prefix, n), range(len(labels), self.order())))
+        print(labels)
 
-        raise NotImplementedError()
+        dot = DotGenerator.generate(self, labels)
+
+        return dot
 
     def complement(self):
         edges = ones(self.__e.shape) - self.__e
+        print(edges)
         g = MatrixGraph(edges=edges)
         return g
 
@@ -177,14 +187,25 @@ class MatrixGraph(Graph):
                 g.add(a, b)
         return g
 
+    def density(self):
+        return 2 * self.size() / (self.order() * (self.order() - 1))
+
     def directed(self):
         return False
+
+    def distance(self, a, b):
+        assert 0 <= a < self.order() and 0 <= b < self.order()
+        d = 0
+        boundary = set([a])
 
     def E(self, a, b=None):
         return self.__e[a][b] == one
 
     def edges(self):
         return {frozenset((i, j)) for i in self.__v for j in self.__v if j > i and self.E(i, j)}
+
+    def matrix(self):
+        return self.__e.copy()
 
     def order(self):
         return self.__order
