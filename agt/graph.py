@@ -34,12 +34,20 @@ class Graph:
         """Add {a,b} to our edge set"""
         raise NotImplementedError()
 
+    def adjacent(self, v):
+        """Get a list of all nodes adjacent to node v"""
+        raise NotImplementedError()
+
     def as_dot(self, labels=None):
         """Represent this graph as a Dot file"""
         raise NotImplementedError()
 
     def complement(self):
         """Calculate the complement graph of self"""
+        raise NotImplementedError()
+
+    def connected(self):
+        """Predicate that computes if self is connected"""
         raise NotImplementedError()
 
     def density(self):
@@ -164,6 +172,10 @@ class MatrixGraph(Graph):
             raise IndexError("Cannot add edge ({},{}) to graph of order {}".format(a,b,self.order()))
         return self
 
+    def adjacent(self, v):
+        assert 0 <= v < self.order()
+        return {i for i, u in enumerate(self.__e[v]) if u}
+
     def as_dot(self, labels=None, prefix='n'):
         if not labels:
             labels = []
@@ -182,6 +194,21 @@ class MatrixGraph(Graph):
         g = MatrixGraph(order=self.order(), edges=edges)
         return g
 
+    def connected(self):
+        visited = set()
+        hopper = set([0])
+        while hopper:
+            new_hopper = set()
+            for x in hopper:
+                if x not in visited:
+                    visited.add(x)
+                    new_hopper.update(self.adjacent(x))
+            hopper = new_hopper.difference(visited)
+        for v in self.__v:
+            if v not in visited:
+                return False
+        return True
+
     @staticmethod
     def create_random(order, density=0.5):
         g = MatrixGraph(order=order)
@@ -199,7 +226,21 @@ class MatrixGraph(Graph):
     def distance(self, a, b):
         assert 0 <= a < self.order() and 0 <= b < self.order()
         d = 0
+        visited = set()
         boundary = set([a])
+        new_boundary = set()
+        while boundary:
+            for x in boundary:
+                if x not in visited:
+                    if x == b:
+                        return d
+                    new_boundary.update(self.adjacent(x))
+                    visited.add(x)
+            d += 1
+            boundary = new_boundary.difference(visited)
+            new_boundary = set()
+
+        return -1
 
     def E(self, a, b=None):
         return self.__e[a][b] == one
