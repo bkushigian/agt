@@ -4,7 +4,7 @@ Graphs
 import numpy as np
 import random
 from collections import Iterable
-from agt.util.arrayops import generate_lower_triangle, ones
+from agt.util.arrayops import generate_lower_triangle, dense_adjacency_matrix
 
 # These are constants so we declare them once to make life easy
 from agt.util.dot import DotGenerator
@@ -84,6 +84,8 @@ class MatrixGraph(Graph):
                 self.__order = len(edges)
                 self.__v = set(np.arange(self.__order, dtype=np.uint32))
                 self.__e = edges.copy()
+                for _ in self.edges():
+                    self.__size += 1
 
             elif isinstance(edges, list):       # This is an adjacency list
                 if len(edges) is 0:
@@ -131,6 +133,8 @@ class MatrixGraph(Graph):
                 if order != len(edges):
                     raise RuntimeError("In MatrixGraph order of {} specified but edges has shape {}".format(order, edges.shape))
                 self.__e = edges.copy()
+                for _ in self.edges():
+                    self.__size += 1
 
             elif isinstance(edges, list):       # This is an adjacency list
                 self.__e = np.zeros((self.__order, self.__order), np.uint32)
@@ -174,9 +178,8 @@ class MatrixGraph(Graph):
         return dot
 
     def complement(self):
-        edges = ones(self.__e.shape) - self.__e
-        print(edges)
-        g = MatrixGraph(edges=edges)
+        edges = dense_adjacency_matrix(self.__e.shape) - self.__e
+        g = MatrixGraph(order=self.order(), edges=edges)
         return g
 
     @staticmethod
