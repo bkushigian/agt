@@ -58,6 +58,10 @@ class Graph:
         """Return true if this is a directed graph, false if it is an undirected graph"""
         raise NotImplementedError()
 
+    def distance(self, a, b):
+        """Return the distance between vertices a and b. If unconnected, return -1"""
+        raise NotImplementedError()
+
     def edges(self):
         """Return a generator over the edges"""
         raise NotImplementedError()
