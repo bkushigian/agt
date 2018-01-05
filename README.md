@@ -45,10 +45,16 @@ Here is a sample session:
      [0, 0, 0, 1],
      [1, 0, 0, 0],
      [0, 1, 0, 0]]
+    >>> g.density()      # Calculate the density of the edge set
+    0.666666666666666
     >>> (0,2) in g
     False
     >>> g.add(0,2).add((1,3))
     <agt.graph.MatrixGraph object at 0x7f1c2a3a6fd8>
+    >>> (0,2) in g
+    True
+    >>> g.density()
+    1.0
 
 ## Development and Contributions
 
