@@ -1,7 +1,8 @@
 from unittest import TestCase
+
 from agt.graph import MatrixGraph
+from agt.math import choose
 from agt.util.arrayops import generate_lower_triangle
-from agt.util.math import choose
 
 
 class TestMatrixGraph(TestCase):
