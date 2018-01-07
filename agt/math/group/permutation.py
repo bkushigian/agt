@@ -1,4 +1,4 @@
-from agt.group.group import Group
+from agt.math.group.group import Group
 
 
 class PermutationGroup(Group):
