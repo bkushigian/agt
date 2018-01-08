@@ -4,10 +4,18 @@ AGT
 `agt` is a basic algebraic graph theory library. It provides a simple API to
 play around with/implement different graph-theoretic algorithms.
 
+## Dependencies
+
+The `agt` project is built using Python3.5 and depends on
+
+* NumPy
+* SymPy
+
+Both of these can be installed using `pip install numpy` and `pip install sympy`
+
 ## Using AGT
 
-`agt` is simply to use - just import it. No outside packages have been used, so
-as long as you are running Python 3.5 or above you should be fine.
+`agt` is simply to use - just import it. 
 
 Here is a sample session:
 
