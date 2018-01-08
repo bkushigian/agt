@@ -4,7 +4,9 @@ Graphs
 import numpy as np
 import random
 from collections import Iterable
+from itertools import product
 from agt.util.arrayops import generate_lower_triangle, dense_adjacency_matrix
+from sympy.combinatorics.permutations import Permutation
 
 # These are constants so we declare them once to make life easy
 from agt.util.dot import DotGenerator
@@ -64,6 +66,18 @@ class Graph:
 
     def edges(self):
         """Return a generator over the edges"""
+        raise NotImplementedError()
+
+    def nodes(self):
+        """Return the set of nodes"""
+        raise NotImplementedError()
+
+    def permute(self, p):
+        """
+        Permute the vertices of the graph by permutation `p`, creating a new graph
+        :param p:
+        :return:
+        """
         raise NotImplementedError()
 
     def remove(self, a, b=None):
@@ -126,7 +140,8 @@ class MatrixGraph(Graph):
                         self.__e = np.zeros((self.__order, self.__order), np.uint32)
                         for i, subl in enumerate(edges):
                             for j in subl:
-                                self.add(i,j)
+                                self.add(i, j)
+
 
             elif edges:
                 raise RuntimeError("Unrecognized edge input: {}".format(edges))
@@ -162,6 +177,10 @@ class MatrixGraph(Graph):
                             for j in subl:
                                 self.add(i, j)
 
+            elif callable(edges):
+                self.__e = np.zeros((order, order), np.uint32)
+                for i, j in product(self.__v, self.__v):
+                    self.__e[i][j] = one if (i != j) and edges(i, j) else zero
             else:
                 self.__e = np.zeros((self.order(), self.order()), np.uint32)
 
@@ -187,7 +206,6 @@ class MatrixGraph(Graph):
         if len(labels) < self.order():
             # Pad our labels to include a label for each vertex
             labels += list(map(lambda n: "{}{}".format(prefix, n), range(len(labels), self.order())))
-        print(labels)
 
         dot = DotGenerator.generate(self, labels)
 
@@ -258,6 +276,22 @@ class MatrixGraph(Graph):
     def order(self):
         return self.__order
 
+    def nodes(self):
+        return self.__v
+
+    def permute(self, p):
+        assert isinstance(p, Permutation)
+        # make sure that p is the right size
+        order = max(self.order(), p.size)
+        if p.size < order:
+            p = Permutation(p, size=order)
+        edges = np.zeros((order, order), dtype=np.uint32)
+        for i in range(order):
+            for j in range(order):
+                if max(i, j) < self.order():
+                    edges[i][j] = self.__e[p(i)][p(j)]
+        return MatrixGraph(edges=edges)
+
     def remove(self, a, b=None):
         a, b = extract_edge(a, b)
         if 0 <= a < self.order() and 0 <= b < self.order():
@@ -271,6 +305,12 @@ class MatrixGraph(Graph):
 
     def size(self):
         return self.__size
+
+    def view(self, dest=None, size=(7, 5), labels=None):
+        DotGenerator.compile_dot(self, dest=dest, size=size, labels=labels, view=True)
+
+    def write_dot(self, dest=None, size=(7,5), labels=None):
+        DotGenerator.write_dot(self, labels=labels, size=size, dest=dest)
 
     def __contains__(self, item):
         if isinstance(item, Iterable) and len(item) is 2:

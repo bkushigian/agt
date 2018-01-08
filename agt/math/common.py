@@ -11,7 +11,7 @@ def choose(n, k):
     :param k:
     :return:
     """
-    return factorial(n) / (factorial(k)*factorial(n - k))
+    return factorial(n) // (factorial(k)*factorial(n - k))
 
 
 def gcd(a, b):

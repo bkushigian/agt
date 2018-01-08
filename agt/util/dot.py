@@ -1,40 +1,47 @@
 from datetime import datetime
+from os import path as osp
+from tempfile import mkstemp, mkdtemp
+import graphviz
+
+
+tempdir = mkdtemp(prefix='AGT_')
+print('tempdir:', tempdir)
 
 
 class DotGenerator:
     @staticmethod
-    def generate(graph, labels=None, size=(1, 1)):
+    def generate(graph, labels=None, size=(7, 5)):
         if graph.directed():
             return DotGenerator.generate_digraph(graph, labels, size)
         else:
             return DotGenerator.generate_graph(graph, labels, size)
 
     @staticmethod
-    def generate_digraph(graph, labels=None, size=(1, 1)):
+    def generate_digraph(graph, labels=None, size=(7, 5)):
         pass
 
     @staticmethod
-    def generate_graph(graph, labels=None, size=(7.5, 10)):
+    def generate_graph(graph, labels=None, size=(7.5, 10), comment=""):
         if labels is None:
             labels = []
 
         if len(labels) < graph.order():
             labels += ['n{}'.format(i) for i in range(len(labels), graph.order())]
 
-        header = ''' graph g {'''
-        size = '''size=\"{},{}\"'''.format(size[0], size[1])
-        nodes = '\n    '.join(map(str, labels))
-        edges = '\n    '.join(['{} -- {}'.format(labels[i], labels[j]) for (i, j) in iter(graph)])
-        footer = '''}\n'''
-        return '\n    '.join([header, size, edges, footer])
+        dot = graphviz.Graph(comment=comment)
+        for node in graph.nodes():
+            dot.node(str(node))
+        for edge in graph.edges():
+            dot.edge(str(list(edge)[0]), str(list(edge)[1]))
+        return dot
 
     @staticmethod
-    def write_dot(graph, labels=None, size=(7.5, 10), dest=None):
+    def compile_dot(graph, labels=None, size=(7.5, 10), dest=None, view=False):
         if dest is None:
-            time = str(datetime.now()).split('.')[0]
-            dest = 'graph{}.dot'.format(time)
+            _, dest = mkstemp(dir=tempdir, suffix='.dot')
+        dot = DotGenerator.generate(graph, labels=labels, size=size)
+        res = dot.render(dest, view=view)
+        return dest, res
 
-        print("Writing DOT file to {}".format(dest))
 
-        with open(dest, 'w') as f:
-            f.write(DotGenerator.generate(graph, labels, size))
+
