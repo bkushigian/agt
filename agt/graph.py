@@ -32,7 +32,7 @@ class Graph:
         """Predicate that tests if {a,b} is in our edge set"""
         raise NotImplementedError()
 
-    def add(self, a, b=None):
+    def add(self, a, b=None, duplicate=False):
         """Add {a,b} to our edge set"""
         raise NotImplementedError()
 
@@ -56,6 +56,11 @@ class Graph:
         """Calculate the density of this graph"""
         raise NotImplementedError()
 
+    def difference(self, other):
+        """Return the difference of this graph and other, where this is defined
+        on graphs of equal order n to be the set of edges in self not in other."""
+        raise NotImplementedError()
+
     def directed(self):
         """Return true if this is a directed graph, false if it is an undirected graph"""
         raise NotImplementedError()
@@ -68,28 +73,83 @@ class Graph:
         """Return a generator over the edges"""
         raise NotImplementedError()
 
+    def intersection(self, other):
+        """If self = (V,E) and other = (V', E'), return (V ∩ V', E ∩ E')"""
+        raise NotImplementedError()
+
+    def is_fixed_by(self, p):
+        """
+        Test if this graph is fixed by a permutation p
+        :param p: a Permutation to be tested to see if its in Aut(self)
+        :return: True if `p` is in Aut(self), False otherwise
+        """
+        raise NotImplementedError()
+
+    def is_subgraph(self, other):
+        raise NotImplementedError()
+
+    def is_supergraph(self, other):
+        return other.is_subgraph(self)
+
     def nodes(self):
         """Return the set of nodes"""
-        raise NotImplementedError()
-
-    def permute(self, p):
-        """
-        Permute the vertices of the graph by permutation `p`, creating a new graph
-        :param p:
-        :return:
-        """
-        raise NotImplementedError()
-
-    def remove(self, a, b=None):
-        """Remove an edge"""
         raise NotImplementedError()
 
     def order(self):
         """Return the number of vertices in self"""
         raise NotImplementedError()
 
+    def permute(self, p):
+        """
+        Permute the vertices of the graph by permutation `p`, creating a new
+        graph.
+        :param p:
+        :return:
+        """
+        raise NotImplementedError()
+
+    def regularity(self):
+        """
+        A graph is k-regular if each vertex has valency k. Graph.regularity()
+        calculates if such a k exists and, if so, returns that k; otherwise
+        it returns None
+        :return: k if G is k-regular, None otherwise
+        """
+        raise NotImplementedError()
+
+    def remove(self, a, b=None, duplicate=False):
+        """Remove an edge"""
+        raise NotImplementedError()
+
     def size(self):
         """Return the number of edges in self"""
+        raise NotImplementedError()
+
+    def union(self, other):
+        """If self = (V, E) and other = (V', E'), return (V ∪ V', E ∪ E')"""
+        raise NotImplementedError()
+
+    def valency(self, v):
+        """
+        The valency of a vertex is the number of vertices adjacent to it.
+        :param v: an element of the vertex set
+        :return: the number of adjacent vertices to `v`
+        """
+        if v not in self.__v:
+            raise ValueError("{} is not a vertex".format(v))
+        return len(self.adjacent(v))
+
+    def vertices(self):
+        """
+        Vertices returns a copy of the vertex set
+        :return: a copy of the vertex set
+        """
+
+    def symmetric_difference(self, other):
+        """Defined to be the union of self - other UNION other - self"""
+        return self.difference(other).union(other.difference(self))
+
+    def __eq__(self, other):
         raise NotImplementedError()
 
     @staticmethod
@@ -184,7 +244,10 @@ class MatrixGraph(Graph):
             else:
                 self.__e = np.zeros((self.order(), self.order()), np.uint32)
 
-    def add(self, a, b=None):
+    def add(self, a, b=None, duplicate=False):
+        if duplicate:
+            return MatrixGraph(order=self.order(), edges=self.__e.copy()).add(a,b)
+
         a, b = extract_edge(a, b)
         if 0 <= a < self.order() and 0 <= b < self.order():
             if not self.E(a, b):
@@ -242,6 +305,16 @@ class MatrixGraph(Graph):
     def density(self):
         return 2 * self.size() / (self.order() * (self.order() - 1))
 
+    def difference(self, other):
+        assert self.order() == other.order()
+
+        def edge_predicate(i, j):
+            if i == j:
+                return False
+            return (i, j) in self and (i, j) not in other
+
+        return MatrixGraph(order=self.order(), edges=edge_predicate)
+
     def directed(self):
         return False
 
@@ -265,16 +338,41 @@ class MatrixGraph(Graph):
         return -1
 
     def E(self, a, b=None):
-        return self.__e[a][b] == one
+        if 0 <= a < self.order() and 0 <= b < self.order():
+            return self.__e[a][b] == one
+        return False
 
     def edges(self):
         return {frozenset((i, j)) for i in self.__v for j in self.__v if j > i and self.E(i, j)}
 
+    def intersection(self, other):
+        order = min(self.order(), other.order())
+
+        def edge_predicate(i, j):
+            if i == j:
+                return False
+            return (i, j) in self and (i, j) in other
+
+        return MatrixGraph(order=order, edges=edge_predicate)
+
+    def is_fixed_by(self, p):
+        for a, b in self.edges():
+            if (p(a), p(b)) not in self:
+                return False
+
+    def is_subgraph(self, other, strict=True):
+        if strict:
+            if self.order() != other.order():
+                return False
+        elif self.order() > other.order():
+            return False
+        for e in self.edges():
+            if e not in other:
+                return False
+        return True
+
     def matrix(self):
         return self.__e.copy()
-
-    def order(self):
-        return self.__order
 
     def nodes(self):
         return self.__v
@@ -292,7 +390,13 @@ class MatrixGraph(Graph):
                     edges[i][j] = self.__e[p(i)][p(j)]
         return MatrixGraph(edges=edges)
 
-    def remove(self, a, b=None):
+    def order(self):
+        return self.__order
+
+    def remove(self, a, b=None, duplicate=False):
+        if duplicate:
+            return MatrixGraph(order=self.order(), edges=self.__e.copy()).remove(a,b)
+
         a, b = extract_edge(a, b)
         if 0 <= a < self.order() and 0 <= b < self.order():
             if self.E(a, b) or self.E(b, a):
@@ -306,17 +410,52 @@ class MatrixGraph(Graph):
     def size(self):
         return self.__size
 
+    def union(self, other):
+        order = max(self.order(), other.order())
+
+        def edge_predicate(i, j):
+            if i == j:
+                return False
+            return (i, j) in self or (i, j) in other
+
+        return MatrixGraph(order=order, edges=edge_predicate)
+
+    def vertices(self):
+        return self.__v.copy()
+
     def view(self, dest=None, size=(7, 5), labels=None):
         DotGenerator.compile_dot(self, dest=dest, size=size, labels=labels, view=True)
 
-    def write_dot(self, dest=None, size=(7,5), labels=None):
+    def write_dot(self, dest=None, size=(7, 5), labels=None):
         DotGenerator.write_dot(self, labels=labels, size=size, dest=dest)
+
+    def xor(self, other):
+        assert self.order() == other.order(), "Cannot take the xor of different ordered graphs"
+
+        def edge_predicate(i, j):
+            if i == j:
+                return False
+            return (((i, j) in self) + ((i, j) in other)) % 2
+
+        return MatrixGraph(order=self.order(), edges=edge_predicate)
 
     def __contains__(self, item):
         if isinstance(item, Iterable) and len(item) is 2:
             a, b = item
             return self.E(a, b)
         return False
+
+    def __eq__(self, other):
+        if self.size() != other.size():
+            return False
+
+        if self.order() != other.order():
+            return False
+
+        my_edges = self.edges()
+        their_edges = other.edges()
+
+        return my_edges == their_edges
 
     def __iter__(self):
         """Iterate through edges"""
