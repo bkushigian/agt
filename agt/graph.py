@@ -74,6 +74,22 @@ class Graph:
         """Predicate that computes if self is connected"""
         raise NotImplementedError()
 
+    def d(self, v):
+        """
+        Return the degree (or valency) of a vertex v.
+
+        Example:
+            >>> g = MatrixGraph(order=4).add(0,1).add(1,2).add(2,3).add(3,0)
+            >>> g.d(0)
+            2
+            >>> g.add(0,2)
+            >>> g.d(0)
+            3
+        :param v: vertex in self.V
+        :return: degree of v
+        """
+        raise NotImplementedError()
+
     def density(self):
         """Calculate the density of this graph"""
         raise NotImplementedError()
@@ -355,6 +371,11 @@ class MatrixGraph(Graph):
             if random.random() < density:
                 g.add(a, b)
         return g
+
+    def d(self, v):
+        if v not in self.V():
+            raise ValueError("Unexpected value {}: expected a vertex".format(v))
+        return len(self.E(v))
 
     def density(self):
         return 2 * self.size() / (self.order() * (self.order() - 1))
