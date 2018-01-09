@@ -24,7 +24,7 @@ def extract_edge(a, b):
     if b is None:
         assert (isinstance(a, tuple) or isinstance(a, set) or isinstance(a, Edge)) and (len(a) == 2)
         a, b = a
-    return {a, b}
+    return Edge(a, b)
 
 
 class Graph:
@@ -292,7 +292,8 @@ class MatrixGraph(Graph):
         if isinstance(Y, int) or isinstance(Y, np.integer):
             Y = {Y}
 
-        result = frozenset({x, y} for x in X for y in Y if x in X and y in Y)
+        result = {Edge(x, y) for x in X for y in Y if (x, y) in self}
+        return result
 
     def V(self):
         return self.__v
@@ -537,6 +538,11 @@ class Edge:
     def __len__(self):
         """This is simply for convenience."""
         return 2
+
+    def __eq__(self, other):
+        if not isinstance(other, Edge):
+            return False
+        return {self.x, self.y} == {other.x, other.y}
 
     def __str__(self):
         return '{' + '{},{}'.format(self.x, self.y) + '}'
