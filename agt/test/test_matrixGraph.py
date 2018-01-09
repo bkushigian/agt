@@ -170,7 +170,7 @@ class TestMatrixGraph(TestCase):
         self.assertEqual(10, g.order())
 
     def test_iter(self):
-        g = MatrixGraph(3).add(0,1).add(0,2).add(1,2)
+        g = MatrixGraph(3).add(0, 1).add(0, 2).add(1, 2)
         assert len(list(g)) == 3
         l = list(g)
         self.assertIn({0, 1}, l)
