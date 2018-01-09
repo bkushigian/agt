@@ -34,9 +34,9 @@ class TestMatrixGraph(TestCase):
 
     def test_add(self):
         g = MatrixGraph(4)
-        self.assertFalse(g.E(0, 1))
+        self.assertFalse(g.is_edge(0, 1))
         g.add(0, 1)
-        self.assertTrue(g.E(0, 1))
+        self.assertTrue(g.is_edge(0, 1))
 
     def test_adjacent(self):
         g = MatrixGraph(5).add(0, 1).add(1, 2).add(2, 3).add(3, 4)
@@ -138,11 +138,11 @@ class TestMatrixGraph(TestCase):
             g.add(a,b)
         for a,b in generate_lower_triangle(5, diagonal=True):
             if (a, b) in g:
-                self.assertTrue(g.E(a, b))
-                self.assertTrue(g.E(b, a))
+                self.assertTrue(g.is_edge(a, b))
+                self.assertTrue(g.is_edge(b, a))
             else:
-                self.assertFalse(g.E(a, b))
-                self.assertFalse(g.E(b, a))
+                self.assertFalse(g.is_edge(a, b))
+                self.assertFalse(g.is_edge(b, a))
 
     def test_edges(self):
         g = MatrixGraph(5)

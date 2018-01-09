@@ -28,7 +28,29 @@ def extract_edge(a, b):
 
 
 class Graph:
-    def E(self, a, b):
+    def E(self, X=None, Y=None):
+        """
+        E(u,v) defines three different classes of edges;
+        (1) E(u=X,v=Y): If X and Y are subsets of V, E(X,Y) returns all edges
+            e = xy where x is in X and y is in Y.
+        (2) E(X): If X is a subset of V, then E(X) returns all edges e = xy
+            where x is in X; this is equivalent to E(X, V)
+        (3) E(): Return all edges. This is equivalent to E(V,V) E() returns the
+            edge set of this graph
+
+        As syntactic sugar, for x in V we write E(x) to denote E({x}) (and
+        similarly for y values)
+        :param X: Subset of vertices
+        :param Y: Subset of vertices
+        :return: All edges xy with X and Y as ends
+        """
+        raise NotImplementedError()
+
+    def V(self):
+        """Returns the vertex set of this graph"""
+        raise NotImplementedError()
+
+    def is_edge(self, a, b=None):
         """Predicate that tests if {a,b} is in our edge set"""
         raise NotImplementedError()
 
@@ -244,13 +266,32 @@ class MatrixGraph(Graph):
             else:
                 self.__e = np.zeros((self.order(), self.order()), np.uint32)
 
+    def E(self, X=None, Y=None):
+        if X is None and Y is None:
+            return self.edges()
+        if X is None:
+            X = self.V()
+        elif Y is None:
+            Y = self.V()
+
+        if isinstance(X, int) or isinstance(X, np.integer):
+            X = {X}
+
+        if isinstance(Y, int) or isinstance(Y, np.integer):
+            Y = {Y}
+
+        result = frozenset({x, y} for x in X for y in Y if x in X and y in Y)
+
+    def V(self):
+        return self.__v
+
     def add(self, a, b=None, duplicate=False):
         if duplicate:
             return MatrixGraph(order=self.order(), edges=self.__e.copy()).add(a,b)
 
         a, b = extract_edge(a, b)
         if 0 <= a < self.order() and 0 <= b < self.order():
-            if not self.E(a, b):
+            if not self.is_edge(a, b):
                 self.__e[a][b] = one
                 self.__e[b][a] = one
                 self.__size += 1
@@ -337,13 +378,8 @@ class MatrixGraph(Graph):
 
         return -1
 
-    def E(self, a, b=None):
-        if 0 <= a < self.order() and 0 <= b < self.order():
-            return self.__e[a][b] == one
-        return False
-
     def edges(self):
-        return {frozenset((i, j)) for i in self.__v for j in self.__v if j > i and self.E(i, j)}
+        return {Edge(i, j) for i in self.__v for j in self.__v if j > i and self.is_edge(i, j)}
 
     def intersection(self, other):
         order = min(self.order(), other.order())
@@ -354,6 +390,11 @@ class MatrixGraph(Graph):
             return (i, j) in self and (i, j) in other
 
         return MatrixGraph(order=order, edges=edge_predicate)
+
+    def is_edge(self, a, b=None):
+        if 0 <= a < self.order() and 0 <= b < self.order():
+            return self.__e[a][b] == one
+        return False
 
     def is_fixed_by(self, p):
         for a, b in self.edges():
@@ -399,7 +440,7 @@ class MatrixGraph(Graph):
 
         a, b = extract_edge(a, b)
         if 0 <= a < self.order() and 0 <= b < self.order():
-            if self.E(a, b) or self.E(b, a):
+            if self.is_edge(a, b) or self.is_edge(b, a):
                 self.__e[a][b] = zero
                 self.__e[b][a] = zero
                 self.__size -= 1
@@ -442,7 +483,7 @@ class MatrixGraph(Graph):
     def __contains__(self, item):
         if isinstance(item, Iterable) and len(item) is 2:
             a, b = item
-            return self.E(a, b)
+            return self.is_edge(a, b)
         return False
 
     def __eq__(self, other):
@@ -463,6 +504,31 @@ class MatrixGraph(Graph):
             for b in self.__v:
                 if b > a:
                     break
-                if self.E(a, b):
-                    yield {a, b}
+                if self.is_edge(a, b):
+                    yield Edge(a, b)
 
+
+# XXX: This is not ready for use - DO NOT USE
+class Edge:
+    def __init__(self, x, y, weight=None):
+        self.x = x
+        self.y = y
+        self.weight = weight
+
+    def __hash__(self):
+        return hash((self.x, self.y))
+
+    def __iter__(self):
+        yield self.x
+        yield self.y
+
+    def __str__(self):
+        return '{' + '{},{}'.format(self.x, self.y) + '}'
+
+    def __repr__(self):
+        return '{' + '{},{}'.format(self.x, self.y) + '}'
+
+
+class EdgeSet:
+    def __init__(self):
+        pass
