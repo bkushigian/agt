@@ -67,7 +67,7 @@ def C(n, circulant_set=None, type='matrix'):
         cs = {int(x) for x in circulant_set}.union({-int(x) for x in circulant_set})
 
         def edge_predicate(i,j):
-            x,y = int(i), int(j)    # In case we are using uint32s
+            x, y = int(i), int(j)    # In case we are using uint32s
             return (x - y) % n in cs or (y - x) % n in cs
 
         g = MatrixGraph(order=n, edges=edge_predicate)
