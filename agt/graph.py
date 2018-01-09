@@ -3,6 +3,7 @@ Graphs
 """
 import numpy as np
 import random
+from math import inf
 from collections import Iterable
 from itertools import product
 from agt.util.arrayops import generate_lower_triangle, dense_adjacency_matrix
@@ -122,7 +123,17 @@ class Graph:
         raise NotImplementedError()
 
     def distance(self, a, b):
-        """Return the distance between vertices a and b. If unconnected, return -1"""
+        """
+        Return the distance between vertices a and b. If unconnected, return math.inf.
+
+        Example:
+            >>> g = Graph(order=5).add(0,1).add(1,2).add(2,3).add(3,4)
+            >>> g.distance(0,4)
+            4
+            >>> g = Graph(order=5).add(0,1).add(2,3)   # Disconnected
+            >>> g.distance(0,3)
+            math.inf
+        """
         raise NotImplementedError()
 
     def edges(self):
@@ -428,7 +439,7 @@ class MatrixGraph(Graph):
             boundary = new_boundary.difference(visited)
             new_boundary = set()
 
-        return -1
+        return inf
 
     def edges(self):
         return {Edge(i, j) for i in self.__v for j in self.__v if j > i and self.is_edge(i, j)}
