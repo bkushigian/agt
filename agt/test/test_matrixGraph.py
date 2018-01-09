@@ -104,6 +104,33 @@ class TestMatrixGraph(TestCase):
         self.assertLessEqual(expected * 0.9, actual)
         self.assertLessEqual(actual, expected * 1.10)
 
+    def test_d(self):
+        """
+        Test the degree function
+        """
+        g = MatrixGraph(order=4).add(0, 1).add(1, 2).add(2, 3).add(3, 0)
+        self.assertEqual(2, g.d(0))
+        self.assertEqual(2, g.d(1))
+        self.assertEqual(2, g.d(2))
+        self.assertEqual(2, g.d(3))
+        g.add(0,2)
+        self.assertEqual(3, g.d(0))
+        self.assertEqual(2, g.d(1))
+        self.assertEqual(3, g.d(2))
+        self.assertEqual(2, g.d(3))
+
+    def test_density1(self):
+        g = MatrixGraph(10).add(0, 1).add(1, 2).add(2, 3).add(3, 4).add(4, 5)
+        self.assertEqual(5/choose(10, 2), g.density())
+
+    def test_density2(self):
+        g = MatrixGraph(10)
+        self.assertEqual(0, g.density())
+
+    def test_density3(self):
+        g = MatrixGraph(4).add(0, 1).add(0, 2).add(0, 3).add(1, 2).add(1, 3).add(2, 3)
+        self.assertEqual(1.0, g.density())
+
     def test_directed(self):
         self.assertFalse(MatrixGraph(10).directed())
 
