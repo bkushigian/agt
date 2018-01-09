@@ -22,8 +22,8 @@ def extract_edge(a, b):
         * a, b are both ints representing the start/end of the edge
     """
     if b is None:
-        assert (isinstance(a, tuple) or isinstance(a, set)) and (len(a) == 2)
-        a, b = tuple(a)
+        assert (isinstance(a, tuple) or isinstance(a, set) or isinstance(a, Edge)) and (len(a) == 2)
+        a, b = a
     return {a, b}
 
 
@@ -215,7 +215,20 @@ class MatrixGraph(Graph):
                         for e in edges:
                             self.add(e)
 
-                    elif isinstance(edges[0], list):  # Adjacency list
+                    elif isinstance(e0, Edge):
+                        order = 0
+                        for a, b in edges:
+                            order = max(order, max(a, b))
+                        order += 1
+
+                        self.__order = order
+                        self.__v = np.arange(order)
+                        self.__e = np.zeros((self.order(), self.order()), np.uint32)
+
+                        for e in edges:
+                            self.add(e)
+
+                    elif isinstance(e0, list):  # Adjacency list
                         order = len(edges)
                         self.__order = order
                         self.__v = np.arange(order)
@@ -223,7 +236,6 @@ class MatrixGraph(Graph):
                         for i, subl in enumerate(edges):
                             for j in subl:
                                 self.add(i, j)
-
 
             elif edges:
                 raise RuntimeError("Unrecognized edge input: {}".format(edges))
@@ -316,7 +328,7 @@ class MatrixGraph(Graph):
         return dot
 
     def complement(self):
-        edges = dense_adjacency_matrix(self.__e.shape) - self.__e
+        edges = dense_adjacency_matrix(self.__e.shape[0]) - self.__e
         g = MatrixGraph(order=self.order(), edges=edges)
         return g
 
@@ -516,11 +528,15 @@ class Edge:
         self.weight = weight
 
     def __hash__(self):
-        return hash((self.x, self.y))
+        return hash(frozenset((self.y, self.x)))
 
     def __iter__(self):
         yield self.x
         yield self.y
+
+    def __len__(self):
+        """This is simply for convenience."""
+        return 2
 
     def __str__(self):
         return '{' + '{},{}'.format(self.x, self.y) + '}'
