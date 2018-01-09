@@ -194,6 +194,16 @@ class TestMatrixGraph(TestCase):
             counter += 1
         self.assertEqual(len(edges_in), counter)
 
+    def test_intersection(self):
+        G = MatrixGraph(order=10).add(0, 1).add(2, 3).add(4, 5).add(8, 9)
+        H = MatrixGraph(order=5).add(0, 1).add(1, 2).add(2, 3)
+        GnH = G.intersection(H)
+        self.assertEqual(5, GnH.order())
+        self.assertEqual(2, GnH.size())
+        edges = GnH.E()
+        self.assertIn(Edge(0, 1), GnH)
+        self.assertIn(Edge(2, 3), GnH)
+
     def test_remove(self):
         g = MatrixGraph(3)
         g.add(0, 1)
