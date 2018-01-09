@@ -1,5 +1,5 @@
 from unittest import TestCase
-from agt.permutations import permutation
+from agt.math.permutations import permutation
 
 
 class TestPermutation(TestCase):

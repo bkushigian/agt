@@ -21,7 +21,7 @@ from functools import reduce
 import numpy as np
 
 from math import inf
-from math.common import lcm
+from agt.math.common import lcm
 
 
 def canonicalize_cycle_tuple(c):
