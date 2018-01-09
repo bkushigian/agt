@@ -344,7 +344,8 @@ class MatrixGraph(Graph):
             elif callable(edges):
                 self.__e = np.zeros((order, order), np.uint32)
                 for i, j in product(self.__v, self.__v):
-                    self.__e[i][j] = one if (i != j) and edges(i, j) else zero
+                    if i != j and edges(i, j):
+                        self.add(i, j)
             else:
                 self.__e = np.zeros((self.order(), self.order()), np.uint32)
 
