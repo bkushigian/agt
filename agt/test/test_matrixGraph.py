@@ -1,4 +1,5 @@
 from unittest import TestCase
+from math import inf
 
 from agt.graph import MatrixGraph, Edge
 from agt.util.arrayops import generate_lower_triangle
@@ -131,6 +132,12 @@ class TestMatrixGraph(TestCase):
         g = MatrixGraph(4).add(0, 1).add(0, 2).add(0, 3).add(1, 2).add(1, 3).add(2, 3)
         self.assertEqual(1.0, g.density())
 
+    def test_density_random(self):
+        for i in range(10):
+            g = MatrixGraph.create_random(order=10)
+            expected = g.size() / (g.size() + g.complement().size())
+            self.assertEqual(expected, g.density())
+
     def test_directed(self):
         self.assertFalse(MatrixGraph(10).directed())
 
@@ -157,6 +164,10 @@ class TestMatrixGraph(TestCase):
         self.assertEqual(2, g.distance(4, 2))
         self.assertEqual(2, g.distance(3, 1))
         self.assertEqual(2, g.distance(2, 0))
+
+    def test_distance2(self):
+        g = MatrixGraph(order=5).add(0, 1).add(3, 4)
+        self.assertEqual(inf, g.distance(0,4))
 
     def test_E(self):
         g = MatrixGraph(5)
