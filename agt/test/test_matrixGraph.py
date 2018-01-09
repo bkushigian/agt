@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from agt.graph import MatrixGraph
+from agt.graph import MatrixGraph, Edge
 from agt.util.arrayops import generate_lower_triangle
 from agt.math.common import choose
 
@@ -173,7 +173,7 @@ class TestMatrixGraph(TestCase):
         g = MatrixGraph(3).add(0, 1).add(0, 2).add(1, 2)
         assert len(list(g)) == 3
         l = list(g)
-        self.assertIn({0, 1}, l)
-        self.assertIn({0, 2}, l)
-        self.assertIn({1, 2}, l)
+        self.assertIn(Edge(0, 1), l)
+        self.assertIn(Edge(0, 2), l)
+        self.assertIn(Edge(1, 2), l)
 
