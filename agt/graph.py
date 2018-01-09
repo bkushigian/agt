@@ -91,12 +91,30 @@ class Graph:
         raise NotImplementedError()
 
     def density(self):
-        """Calculate the density of this graph"""
+        """
+        Return the percentage of possible edges that are present. This is
+        implemented differently for directed/undirected graphs.
+
+        Example of Undirected Graph:
+            >>> g = Graph(order=5).add(0,1).add(1,2).add(2,3).add(3,4).add(4,0)
+            >>> g.density()
+            0.5
+            >>> g.size() / (g.size() + g.complement().size())
+            0.5
+        """
         raise NotImplementedError()
 
     def difference(self, other):
-        """Return the difference of this graph and other, where this is defined
-        on graphs of equal order n to be the set of edges in self not in other."""
+        """
+        Return the difference of this graph and other, where this is defined
+        on graphs of equal order n to be the set of edges in self not in other.
+
+        Example:
+            >>> K4 = Graph(order=4, edges=[(0,1), (1,2), (2,3), (3,0), (0,2), (1,3)]
+            >>> C4 = Graph(order=4, edges=[(0,1), (1,2), (2,3), (3,0)])
+            >>> K4.difference(C4).E()    # Get the edges of the difference
+            {{1,3}, {0,2}}
+        """
         raise NotImplementedError()
 
     def directed(self):
