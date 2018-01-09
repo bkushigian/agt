@@ -486,9 +486,12 @@ class MatrixGraph(Graph):
         return False
 
     def is_fixed_by(self, p):
-        for a, b in self.edges():
-            if (p(a), p(b)) not in self:
+        for a, b in self.E():
+            x = p(a) if a < p.size else a
+            y = p(b) if b < p.size else b
+            if Edge(x, y) not in self:
                 return False
+        return True
 
     def is_subgraph(self, other, strict=True):
         if strict:
