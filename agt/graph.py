@@ -137,16 +137,41 @@ class Graph:
         raise NotImplementedError()
 
     def edges(self):
-        """Return a generator over the edges"""
+        """
+        Return a generator over the edges. This should be replaced with Graph.E()
+        """
         raise NotImplementedError()
 
     def intersection(self, other):
-        """If self = (V,E) and other = (V', E'), return (V ∩ V', E ∩ E')"""
+        """
+        If self = (V,E) and other = (V', E'), return (V ∩ V', E ∩ E')
+
+        Example:
+            >>> G = Graph(order=10).add(0,1).add(2,3).add(4,5).add(8,9)
+            >>> H = Graph(order=5).add(0,1).add(1,2).add(2,3)
+            >>> GnH = G.intersection(H)
+            >>> GnH.order()
+            5
+            >>> GnH.V()
+            {0,1,2,3,4}
+            >>> GnH.E()
+            {{0,1}, {2,3}}
+        """
         raise NotImplementedError()
 
     def is_fixed_by(self, p):
         """
         Test if this graph is fixed by a permutation p
+
+        Example:
+            >>> from sympy.combinatorics.permutations import Permutation
+            >>> G = Graph(order=4).add(0,1).add(1,2).add(2,3).add(3,0)
+            >>> p = Perm(0,1,2,3)
+            >>> G.is_fixed_by(p)
+            True
+            >>> q = Perm(0,1,2)
+            >>> G.is_fixed_by(q)
+            False
         :param p: a Permutation to be tested to see if its in Aut(self)
         :return: True if `p` is in Aut(self), False otherwise
         """
