@@ -3,6 +3,7 @@ from math import inf
 
 from agt.graph import MatrixGraph, Edge
 from agt.util.arrayops import generate_lower_triangle
+from agt.util.graphutil import C, K, J
 from agt.math.common import choose
 
 
@@ -203,6 +204,9 @@ class TestMatrixGraph(TestCase):
         edges = GnH.E()
         self.assertIn(Edge(0, 1), GnH)
         self.assertIn(Edge(2, 3), GnH)
+
+    def test_is_fixed_by(self):
+        self.fail()
 
     def test_remove(self):
         g = MatrixGraph(3)
