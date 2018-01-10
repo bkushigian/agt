@@ -1,5 +1,6 @@
 from unittest import TestCase
 from math import inf
+from sympy.combinatorics.permutations import Permutation
 
 from agt.graph import MatrixGraph, Edge
 from agt.util.arrayops import generate_lower_triangle
@@ -205,8 +206,30 @@ class TestMatrixGraph(TestCase):
         self.assertIn(Edge(0, 1), GnH)
         self.assertIn(Edge(2, 3), GnH)
 
-    def test_is_fixed_by(self):
-        self.fail()
+    def test_is_fixed_by1(self):
+        G = C(4)        # A 4-cycle
+        p = Permutation(0, 1, 2, 3)
+        self.assertTrue(G.is_fixed_by(p))
+
+    def test_is_fixed_by2(self):
+        G = C(4)        # A 4-cycle
+        p = Permutation(0, 2)
+        self.assertTrue(G.is_fixed_by(p))
+
+    def test_is_fixed_by3(self):
+        G = C(4)        # A 4-cycle
+        p = Permutation()
+        self.assertTrue(G.is_fixed_by(p))
+
+    def test_is_fixed_by4(self):
+        G = C(4)        # A 4-cycle
+        p = Permutation(1, 2)
+        self.assertFalse(G.is_fixed_by(p))
+
+    def test_is_fixed_by5(self):
+        G = C(4)        # A 4-cycle
+        p = Permutation(1, 2, 3)
+        self.assertFalse(G.is_fixed_by(p))
 
     def test_remove(self):
         g = MatrixGraph(3)
