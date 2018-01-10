@@ -99,7 +99,7 @@ class TestMatrixGraph(TestCase):
         test_runs = 10
         for i in range(test_runs):
             g = MatrixGraph.create_random(32, density=density)
-            for _,_ in g.edges():
+            for _, _ in g.E():
                 total_edges += 1
 
         expected = test_runs * choose(32, 2) * density
@@ -191,7 +191,7 @@ class TestMatrixGraph(TestCase):
             g.add(a, b)
 
         counter = 0
-        for a, b in g.edges():
+        for a, b in g.E():
             self.assertTrue((a, b) in edges_in or (b, a) in edges_in)
             counter += 1
         self.assertEqual(len(edges_in), counter)

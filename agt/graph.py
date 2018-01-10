@@ -136,12 +136,6 @@ class Graph:
         """
         raise NotImplementedError()
 
-    def edges(self):
-        """
-        Return a generator over the edges. This should be replaced with Graph.E()
-        """
-        raise NotImplementedError()
-
     def intersection(self, other):
         """
         If self = (V,E) and other = (V', E'), return (V ∩ V', E ∩ E')
@@ -182,10 +176,6 @@ class Graph:
 
     def is_supergraph(self, other):
         return other.is_subgraph(self)
-
-    def nodes(self):
-        """Return the set of nodes"""
-        raise NotImplementedError()
 
     def order(self):
         """Return the number of vertices in self"""
@@ -262,7 +252,7 @@ class MatrixGraph(Graph):
                 self.__order = len(edges)
                 self.__v = set(np.arange(self.__order, dtype=np.uint32))
                 self.__e = edges.copy()
-                for _ in self.edges():
+                for _ in self.E():
                     self.__size += 1
 
             elif isinstance(edges, list):       # This is an adjacency list
@@ -324,7 +314,7 @@ class MatrixGraph(Graph):
                 if order != len(edges):
                     raise RuntimeError("In MatrixGraph order of {} specified but edges has shape {}".format(order, edges.shape))
                 self.__e = edges.copy()
-                for _ in self.edges():
+                for _ in self.E():
                     self.__size += 1
 
             elif isinstance(edges, list):       # This is an adjacency list
@@ -351,7 +341,7 @@ class MatrixGraph(Graph):
 
     def E(self, X=None, Y=None):
         if X is None and Y is None:
-            return self.edges()
+            return {Edge(i, j) for i in self.__v for j in self.__v if j > i and self.is_edge(i, j)}
         if X is None:
             X = self.V()
         elif Y is None:
@@ -467,9 +457,6 @@ class MatrixGraph(Graph):
 
         return inf
 
-    def edges(self):
-        return {Edge(i, j) for i in self.__v for j in self.__v if j > i and self.is_edge(i, j)}
-
     def intersection(self, other):
         order = min(self.order(), other.order())
 
@@ -499,16 +486,13 @@ class MatrixGraph(Graph):
                 return False
         elif self.order() > other.order():
             return False
-        for e in self.edges():
+        for e in self.E():
             if e not in other:
                 return False
         return True
 
     def matrix(self):
         return self.__e.copy()
-
-    def nodes(self):
-        return self.__v
 
     def permute(self, p):
         assert isinstance(p, Permutation)
@@ -585,8 +569,8 @@ class MatrixGraph(Graph):
         if self.order() != other.order():
             return False
 
-        my_edges = self.edges()
-        their_edges = other.edges()
+        my_edges = self.E()
+        their_edges = other.E()
 
         return my_edges == their_edges
 
