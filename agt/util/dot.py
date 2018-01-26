@@ -29,9 +29,9 @@ class DotGenerator:
             labels += ['n{}'.format(i) for i in range(len(labels), graph.order())]
 
         dot = graphviz.Graph(comment=comment)
-        for node in graph.nodes():
+        for node in graph.V():
             dot.node(str(node))
-        for edge in graph.edges():
+        for edge in graph.E():
             dot.edge(str(list(edge)[0]), str(list(edge)[1]))
         return dot
 
