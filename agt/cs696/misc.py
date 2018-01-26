@@ -26,9 +26,10 @@ def do_you_speak_barrington(g_string):
     :return: The appropriate MatrixGraph
     """
     if ':' in g_string:
-        g_string = g_string[g_string.index(':'):]
+        g_string = g_string[g_string.index(':') + 1:]
     g_string = g_string.strip()
     g_strings = g_string.split()
+    print (g_strings)
     order = len(g_strings) + 1
     G = MatrixGraph(order=order)
     for i, s in enumerate(g_strings):
