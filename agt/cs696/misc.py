@@ -2,26 +2,18 @@
 Miscellaneous functions to play with
 """
 
-from itertools import product
+from itertools import product, combinations
 from agt.graph import MatrixGraph
 
 
-def is_clique(c, G):
-    for (a,b) in product(c, repeat=2):
-        if a != b and not G.is_edge(a,b):
-            return False
-    return True
-
-
-def list_cliques(G):
-    V = G.V()
-    E = G.E()
-    cliques = set()
-
-
-def is_line_graph(G):
-    # TODO: Write test for a line graph
-    pass
+def count_char(s, c='1'):
+    """
+    Count the number of occurences of c in s
+    :param s: string to count occurrences in
+    :param c: character to count
+    :return: number of times c occurs in s
+    """
+    return sum(x == c for x in s)
 
 
 def do_you_speak_barrington(g_string):
@@ -44,3 +36,31 @@ def do_you_speak_barrington(g_string):
             if c == '1':
                 G.add(i+1, j)
     return G
+
+
+def sample_no_replacement(collection, min=1, max=-1):
+    if max == -1:
+        max = len(collection)
+
+    result = set()
+    for r in range(min, max + 1):
+        result.update(combinations(collection, r))
+    return result
+
+
+def is_clique(c, G):
+    for (a,b) in product(c, repeat=2):
+        if a != b and not G.is_edge(a,b):
+            return False
+    return True
+
+
+def list_cliques(G):
+    V = G.V()
+    E = G.E()
+    cliques = set()
+
+
+def is_line_graph(G):
+    # TODO: Write test for a line graph
+    pass
